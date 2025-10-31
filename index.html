@@ -115,6 +115,11 @@
             transform: translateY(-5px);
             box-shadow: 0 12px 32px rgba(212, 160, 33, 0.3);
         }
+        
+        .product-card.friday-special {
+            border: 2px solid #ffc107;
+            box-shadow: 0 8px 32px rgba(255, 193, 7, 0.4);
+        }
 
         .product-image {
             background: #374151;
@@ -817,9 +822,6 @@
         }
     </style>
 
-    <!-- ================================== -->
-    <!--   SCRIPTS DO FIREBASE CORRIGIDOS   -->
-    <!-- ================================== -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
@@ -939,19 +941,11 @@
                     Rua Romualdo Albino Balestrin, 35<br>
                     COHAB III - Conchas/SP
                 </div>
-            </div> <!-- Fim da delivery-section -->
-
-            <!-- ================================== -->
-            <!--   NOVOS CAMPOS ADICIONADOS AQUI   -->
-            <!-- ================================== -->
-            <div class="delivery-section">
+            </div> <div class="delivery-section">
                 <div class="delivery-title">👤 Seus Dados</div>
                 <input type="text" id="cliente-nome" class="input-field" placeholder="Seu Nome (obrigatório)">
                 <input type="tel" id="cliente-whatsapp" class="input-field" placeholder="Seu WhatsApp com DDD (obrigatório)">
             </div>
-            <!-- ================================== -->
-            <!--       FIM DA NOVA SEÇÃO        -->
-            <!-- ================================== -->
 
             <div class="payment-section">
                 <div class="payment-title">💳 Forma de Pagamento</div>
@@ -1027,6 +1021,7 @@
         var estoqueDisponivel = true;
 
         var lanches = [
+            { id: 5, nome: '⭐ ESPECIAL DE SEXTA: TOSCANA', descricao: 'Linguiça toscana suculenta, rúcula fresca, queijo (prato ou mussarela) e tomate no pão baguete.', preco: 24.90, imagem: 'toscana.png', tipo: 'lanche', ingredientesBase: ['queijo', 'rucula', 'tomate'], apenasSexta: true },
             { id: 1, nome: 'CLÁSSICO PERNIL', descricao: 'Pernil desfiado no tempero da casa, queijo prato ou mussarela derretido, salada de repolho crocante, vinagrete de tomate e cebola, maionese no pão baguete.', preco: 19.90, imagem: 'pernil.png', tipo: 'lanche', ingredientesBase: ['queijo', 'repolho-maionese', 'tomate', 'maionese'] },
             { id: 2, nome: 'FRANGO CREMOSO', descricao: 'Frango desfiado temperado, Catupiry original cremoso, bacon, vinagrete de tomate e cebola no pão baguete.', preco: 21.90, imagem: 'frango.png', tipo: 'lanche', ingredientesBase: ['catupiry', 'bacon', 'tomate'] },
             { id: 3, nome: 'COSTELA ESPECIAL', descricao: 'Costela bovina desfiada e suculenta, queijo prato ou mussarela derretido, molho barbecue, vinagrete de tomate e cebola no pão baguete.', preco: 21.90, imagem: 'costela.png', tipo: 'lanche', ingredientesBase: ['queijo', 'tomate'] },
@@ -1053,38 +1048,45 @@
             { id: 'sem-catupiry', nome: 'Sem Catupiry', ingredienteId: 'catupiry' },
             { id: 'sem-tomate', nome: 'Sem Vinagrete (Tomate e Cebola)', ingredienteId: 'tomate' }, 
             { id: 'sem-maionese', nome: 'Sem Maionese', ingredienteId: 'maionese' }, 
-            { id: 'sem-repolho-maionese', nome: 'Sem Repolho com Maionese', ingredienteId: 'repolho-maionese' }
+            { id: 'sem-repolho-maionese', nome: 'Sem Repolho com Maionese', ingredienteId: 'repolho-maionese' },
+            { id: 'sem-rucula', nome: 'Sem Rúcula', ingredienteId: 'rucula' }
         ];
 
         var cart = [];
         var currentLanche = null;
         var freteAtual = 0;
 
-        // ===============================================
-        //     CONFIG DO FIREBASE COM SUAS CHAVES
-        // ===============================================
+        // CONFIG DO FIREBASE COM SUAS CHAVES
         var firebaseConfig = {
             apiKey: "AIzaSyAQTm3cL26REQloN8AFP28gwsIUzYz73og",
             authDomain: "dona-baguete-kds.firebaseapp.com",
-            // A LINHA ABAIXO FOI ADICIONADA:
-            databaseURL: "https://dona-baguete-kds-default-rtdb.firebaseio.com",
+            databaseURL: "https://dona-baguete-kds-default-rtdb.firebaseio.com", 
             projectId: "dona-baguete-kds",
             storageBucket: "dona-baguete-kds.firebasestorage.app",
             messagingSenderId: "307283406823",
             appId: "1:307283406823:web:a7d1761f0b4550cae59742",
             measurementId: "G-NY4NTLFLCG"
         };
-        // ===============================================
-
+        
         // Inicializa o Firebase (sintaxe v8)
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
         
         function renderLanches() {
+            const hoje = new Date().getDay(); // 0 = Domingo, 5 = Sexta
+            const ehSexta = (hoje === 5);
             var html = '';
+            
             lanches.forEach(lanche => {
-                html += `<div class="product-card">
+                
+                if (lanche.apenasSexta && !ehSexta) {
+                    return; 
+                }
+                
+                const classeEspecial = lanche.apenasSexta ? 'friday-special' : '';
+
+                html += `<div class="product-card ${classeEspecial}">
                     <div class="product-image" style="background-image: url('${lanche.imagem}'); background-size: contain; background-position: center; background-repeat: no-repeat;"></div>
                     <div class="product-info">
                         <div class="product-name">${lanche.nome}</div>
@@ -1135,7 +1137,7 @@
             document.getElementById('modal-title').textContent = currentLanche.nome;
             document.getElementById('observacao').value = '';
 
-            const lanchesComQueijo = [1, 3]; 
+            const lanchesComQueijo = [1, 3, 5]; 
             const queijoSection = document.getElementById('tipo-queijo-section');
             
             if (lanchesComQueijo.includes(currentLanche.id)) {
@@ -1217,7 +1219,7 @@
                 nomeFinal += ` (Bellpar ${saborSelecionado})`;
             }
 
-            const lanchesComQueijo = [1, 3];
+            const lanchesComQueijo = [1, 3, 5]; 
             let queijoSelecionado = null;
             if (lanchesComQueijo.includes(currentLanche.id)) {
                 queijoSelecionado = document.querySelector('input[name="tipo-queijo"]:checked').value;
@@ -1393,10 +1395,11 @@
             
             // 3. Validar Endereço (se não for retirada)
             var enderecoCompleto = "Retirada no Local";
+            var rua = "", numero = "", bairro = "";
             if (localidade.value !== 'retirada') {
-                var rua = document.getElementById('endereco-rua').value.trim();
-                var numero = document.getElementById('endereco-numero').value.trim();
-                var bairro = document.getElementById('endereco-bairro').value.trim();
+                rua = document.getElementById('endereco-rua').value.trim();
+                numero = document.getElementById('endereco-numero').value.trim();
+                bairro = document.getElementById('endereco-bairro').value.trim();
                 if (!rua || !numero || !bairro) {
                     showNotification('Preencha seu endereço completo (Rua, Número e Bairro)!');
                     return;
@@ -1406,19 +1409,21 @@
 
             // 4. VALIDAR NOVOS CAMPOS: Cliente e WhatsApp
             var clienteNome = document.getElementById('cliente-nome').value.trim();
-            var clienteWhatsApp = document.getElementById('cliente-whatsapp').value.trim().replace(/\D/g, ''); // Remove não-números
+            var clienteWhatsAppInput = document.getElementById('cliente-whatsapp').value.trim();
+            var clienteWhatsAppNum = clienteWhatsAppInput.replace(/\D/g, ''); // Remove não-números
             
             if (!clienteNome) {
                 showNotification('Por favor, digite seu nome!');
                 return;
             }
-            if (clienteWhatsApp.length < 10) { // Verifica se tem pelo menos 10 dígitos (DDD + 8)
+            if (clienteWhatsAppNum.length < 10) { // Verifica se tem pelo menos 10 dígitos (DDD + 8)
                 showNotification('Por favor, digite seu WhatsApp com DDD!');
                 return;
             }
-            // Adiciona o 55 (código do Brasil) se não tiver
-            if (clienteWhatsApp.length < 12) {
-                 clienteWhatsApp = "55" + clienteWhatsApp;
+            
+            var clienteWhatsAppFormatado = clienteWhatsAppNum;
+            if (clienteWhatsAppNum.length < 12) {
+                 clienteWhatsAppFormatado = "55" + clienteWhatsAppNum;
             }
 
             // 5. Validar Pagamento
@@ -1440,19 +1445,19 @@
             const pedidoCompleto = {
                 cliente: {
                     nome: clienteNome,
-                    whatsapp: clienteWhatsApp
+                    whatsapp: clienteWhatsAppFormatado // Salva o número formatado
                 },
                 itens: cart,
                 entrega: {
-                    tipo: localidade.value, // 'dentro', 'fora', 'retirada'
+                    tipo: localidade.value, 
                     endereco: enderecoCompleto,
                     taxa: freteAtual
                 },
                 pagamento: metodoPagamento,
                 subtotal: subtotal,
                 total: total,
-                status: 'Pendente', // É AQUI QUE A MÁGICA COMEÇA!
-                hora: new Date().toISOString() // Para ordenar por chegada
+                status: 'Pendente', 
+                hora: new Date().toISOString() 
             };
 
             // 7. Enviar para o Firebase
@@ -1462,28 +1467,41 @@
 
             database.ref('pedidos').push(pedidoCompleto)
                 .then(() => {
-                    // SUCESSO!
                     showNotification('Pedido recebido pela cozinha!', 'success');
                     
-                    // Limpa o carrinho e reseta
+                    // ===============================================
+                    //   NOVA FUNÇÃO: SALVAR DADOS DO CLIENTE
+                    // ===============================================
+                    try {
+                        localStorage.setItem('donabaguete_nome', clienteNome);
+                        localStorage.setItem('donabaguete_whatsapp', clienteWhatsAppInput); // Salva o valor original do input
+                        
+                        if (localidade.value !== 'retirada') {
+                            localStorage.setItem('donabaguete_rua', rua);
+                            localStorage.setItem('donabaguete_numero', numero);
+                            localStorage.setItem('donabaguete_bairro', bairro);
+                        }
+                    } catch (e) {
+                        console.warn("Não foi possível salvar os dados do cliente no localStorage.", e);
+                    }
+                    // ===============================================
+
+                    // Limpa o carrinho e fecha
                     cart = [];
                     updateCart();
-                    toggleCart(); // Fecha o carrinho
-                    document.getElementById('cliente-nome').value = '';
-                    document.getElementById('cliente-whatsapp').value = '';
-                    // (Resetar botões de rádio, se desejar)
+                    toggleCart(); 
+                    
+                    // NÃO limpa mais os campos de cliente, eles ficam salvos
 
-                    // Abre o WhatsApp para o cliente confirmar (opcional, mas bom)
                     let msgZap = `Olá, Dona Baguete! 👋 Acabei de fazer meu pedido pelo site (Cliente: ${clienteNome}). Aguardo a confirmação.`;
                     var whatsappUrl = 'https://wa.me/5514991718704?text=' + encodeURIComponent(msgZap);
                     window.open(whatsappUrl, '_blank');
                     
-                    checkoutBtn.disabled = false; // Reabilita o botão para um novo pedido
+                    checkoutBtn.disabled = false; 
                     checkoutBtn.textContent = '✅ Finalizar e Enviar Pedido';
 
                 })
                 .catch((error) => {
-                    // ERRO!
                     console.error("Erro ao enviar pedido: ", error);
                     showNotification('Erro ao enviar pedido. Tente novamente.');
                     checkoutBtn.disabled = false;
@@ -1553,7 +1571,7 @@
                 let proximoDiaNome = proximoDiaIndex !== -1 ? `na próxima ${diasSemana[proximoDiaIndex]}` : 'em breve';
                 dias.textContent = `Nossos dias de funcionamento são: ${nomesDiasAbertos}. Voltamos ${proximoDiaNome}.`;
                 overlay.style.display = 'flex';
-                desativarBautoes();
+                desativarBotoes();
                 return;
             }
 
@@ -1567,12 +1585,45 @@
         }
 
         // ===============================================
-        //   GARANTE QUE PRODUTOS SEJAM RENDERIZADOS
+        //     NOVA FUNÇÃO: CARREGAR DADOS DO CLIENTE
+        // ===============================================
+        function carregarDadosCliente() {
+            try {
+                const nome = localStorage.getItem('donabaguete_nome');
+                const whatsapp = localStorage.getItem('donabaguete_whatsapp');
+                const rua = localStorage.getItem('donabaguete_rua');
+                const numero = localStorage.getItem('donabaguete_numero');
+                const bairro = localStorage.getItem('donabaguete_bairro');
+
+                if (nome) {
+                    document.getElementById('cliente-nome').value = nome;
+                }
+                if (whatsapp) {
+                    document.getElementById('cliente-whatsapp').value = whatsapp;
+                }
+                if (rua) {
+                    document.getElementById('endereco-rua').value = rua;
+                }
+                if (numero) {
+                    document.getElementById('endereco-numero').value = numero;
+                }
+                if (bairro) {
+                    document.getElementById('endereco-bairro').value = bairro;
+                }
+
+            } catch (e) {
+                console.warn("Não foi possível carregar os dados do cliente.", e);
+            }
+        }
+
+        // ===============================================
+        //     CHAMADA DA NOVA FUNÇÃO AO CARREGAR
         // ===============================================
         document.addEventListener('DOMContentLoaded', () => {
             renderLanches();
             renderBebidas();
             gerenciarStatusLoja();
+            carregarDadosCliente(); // <-- ADICIONADO AQUI
         });
     </script>
 </body>
