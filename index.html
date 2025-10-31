@@ -1,4 +1,4 @@
-]<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -1022,15 +1022,12 @@
         var estoqueDisponivel = true;
 
         var lanches = [
-            { id: 5, nome: '⭐ ESPECIAL DE SEXTA: TOSCANA', descricao: 'Linguiça toscana suculenta, rúcula fresca, queijo (prato ou mussarela) e vinagrete de tomate e cebola no pão baguete.', preco: 21.90, imagem: 'toscana.png', tipo: 'lanche', ingredientesBase: ['queijo', 'rucula', 'tomate'], apenasSexta: true },
+            { id: 5, nome: '⭐ ESPECIAL DE SEXTA: TOSCANA', descricao: 'Linguiça toscana suculenta, rúcula fresca, queijo (prato ou mussarela) e tomate no pão baguete.', preco: 24.90, imagem: 'toscana.png', tipo: 'lanche', ingredientesBase: ['queijo', 'rucula', 'tomate'], apenasSexta: true },
             { id: 1, nome: 'CLÁSSICO PERNIL', descricao: 'Pernil desfiado no tempero da casa, queijo prato ou mussarela derretido, salada de repolho crocante, vinagrete de tomate e cebola, maionese no pão baguete.', preco: 19.90, imagem: 'pernil.png', tipo: 'lanche', ingredientesBase: ['queijo', 'repolho-maionese', 'tomate', 'maionese'] },
             { id: 2, nome: 'FRANGO CREMOSO', descricao: 'Frango desfiado temperado, Catupiry original cremoso, bacon, vinagrete de tomate e cebola no pão baguete.', preco: 21.90, imagem: 'frango.png', tipo: 'lanche', ingredientesBase: ['catupiry', 'bacon', 'tomate'] },
             { id: 3, nome: 'COSTELA ESPECIAL', descricao: 'Costela bovina desfiada e suculenta, queijo prato ou mussarela derretido, molho barbecue, vinagrete de tomate e cebola no pão baguete.', preco: 21.90, imagem: 'costela.png', tipo: 'lanche', ingredientesBase: ['queijo', 'tomate'] },
         ];
 
-        // ===============================================
-        //     ARRAY DE BEBIDAS ATUALIZADO
-        // ===============================================
         var bebidas = [
             { id: 102, nome: 'Coca-Cola Lata 350ml', preco: 6.00, imagem: 'coca-lata.png', sabores: ['Normal', 'Zero Açúcar'] },
             { id: 103, nome: 'Refrigerante Bellpar 600ml', preco: 5.00, imagem: 'bellpar-600ml.png', sabores: ['Conch-Cola', 'Tubaína', 'Guaraná'] },
@@ -1090,7 +1087,7 @@
                 
                 const classeEspecial = lanche.apenasSexta ? 'friday-special' : '';
 
-                // REVERTIDO para 'contain'
+                // Voltamos para 'contain'
                 html += `<div class="product-card ${classeEspecial}">
                     <div class="product-image" style="background-image: url('${lanche.imagem}'); background-size: contain; background-position: center; background-repeat: no-repeat;"></div>
                     <div class="product-info">
@@ -1106,19 +1103,15 @@
             document.getElementById('lanches-grid').innerHTML = html;
         }
 
-        // ===============================================
-        //     FUNÇÃO 'renderBebidas' ATUALIZADA
-        // ===============================================
         function renderBebidas() {
             var html = '';
             bebidas.forEach(bebida => {
                 
-                // Lógica atualizada: se tem 'sabores', abre o modal. Se não, adiciona direto.
                 const acaoBotao = (bebida.sabores && bebida.sabores.length > 0)
                     ? `openSaborModal(${bebida.id})`
                     : `addProdutoDiretoAoCarrinho(${bebida.id}, 'bebida')`;
 
-                // REVERTIDO para 'contain'
+                // Voltamos para 'contain'
                 html += `<div class="product-card">
                     <div class="product-image" style="background-image: url('${bebida.imagem}'); background-size: contain; background-repeat: no-repeat; background-position: center;"></div>
                     <div class="product-info">
@@ -1243,9 +1236,6 @@
             showNotification(`${currentLanche.nome} adicionado ao carrinho!`, 'success');
         }
 
-        // ===============================================
-        //     FUNÇÃO 'openSaborModal' ATUALIZADA
-        // ===============================================
         function openSaborModal(bebidaId) {
             if (!verificarHorarioFuncionamento(true)) return;
             
@@ -1255,16 +1245,14 @@
                 return;
             }
 
-            var sabores = bebida.sabores; // Pega os sabores da bebida (ex: ['Normal', 'Zero Açúcar'])
+            var sabores = bebida.sabores; 
             
-            // Cria os botões de sabor dinamicamente
             var saboresHTML = sabores.map(sabor => 
                 `<div class="option-item" onclick="addBebidaComSabor('${bebida.nome}', ${bebida.preco}, '${sabor}')">
                     <span class="option-label" style="flex: 1; text-align: center; font-size: 1.2rem; font-weight: bold;">${sabor}</span>
                 </div>`
             ).join('');
 
-            // Cria o HTML do modal
             var modalHTML = `
                 <div class="modal active" id="sabor-modal" onclick="closeSaborModal()">
                     <div class="modal-content" onclick="event.stopPropagation()">
@@ -1281,7 +1269,6 @@
                     </div>
                 </div>`;
             
-            // Adiciona o modal ao body
             document.body.insertAdjacentHTML('beforeend', modalHTML);
         }
 
@@ -1419,6 +1406,9 @@
             updateCartTotal();
         }
 
+        // ===============================================
+        //     FUNÇÃO 'enviarPedido' ATUALIZADA
+        // ===============================================
         function enviarPedido() {
             // 1. Validar Itens
             if (cart.length === 0) {
@@ -1473,7 +1463,7 @@
                 return;
             }
 
-            // 6. Preparar o Pedido para o Banco de Dados
+            // 6. Preparar o Pedido (Objeto)
             var subtotal = cart.reduce((sum, item) => sum + (item.precoTotal || item.preco) * item.quantidade, 0);
             var total = subtotal + freteAtual;
             
@@ -1500,13 +1490,31 @@
                 hora: new Date().toISOString() 
             };
 
-            // 7. Enviar para o Firebase
+            // ===============================================
+            //     ⭐ MUDANÇA AQUI: WHATSAPP ABRE PRIMEIRO
+            // ===============================================
+            
+            // 7. Preparar WhatsApp e Abrir (ANTES de enviar ao DB para evitar pop-up block)
+            let msgZap = '';
+            if (pagamento.value === 'pix') {
+                // Mensagem específica para PIX
+                msgZap = `Olá, Dona Baguete! 👋 Acabei de fazer um pedido (Cliente: ${clienteNome}) e paguei com PIX.\n\nVou enviar o comprovante em seguida.`;
+            } else {
+                // Mensagem padrão para outros métodos
+                msgZap = `Olá, Dona Baguete! 👋 Acabei de fazer meu pedido pelo site (Cliente: ${clienteNome}). Aguardo a confirmação.`;
+            }
+            
+            var whatsappUrl = 'https://wa.me/5514991718704?text=' + encodeURIComponent(msgZap);
+            window.open(whatsappUrl, '_blank'); // Abrir IMEDIATAMENTE
+
+            // 8. Desabilitar botão e Enviar para o Firebase
             const checkoutBtn = document.querySelector('.checkout-btn');
             checkoutBtn.disabled = true;
             checkoutBtn.textContent = 'Enviando... ⌛';
 
             database.ref('pedidos').push(pedidoCompleto)
                 .then(() => {
+                    // SUCESSO NO ENVIO
                     showNotification('Pedido recebido pela cozinha!', 'success');
                     
                     try {
@@ -1522,19 +1530,19 @@
                         console.warn("Não foi possível salvar os dados do cliente no localStorage.", e);
                     }
 
+                    // Limpa o carrinho e fecha
                     cart = [];
                     updateCart();
                     toggleCart(); 
                     
-                    let msgZap = `Olá, Dona Baguete! 👋 Acabei de fazer meu pedido pelo site (Cliente: ${clienteNome}). Aguardo a confirmação.`;
-                    var whatsappUrl = 'https://wa.me/5514991718704?text=' + encodeURIComponent(msgZap);
-                    window.open(whatsappUrl, '_blank');
+                    // O WhatsApp JÁ FOI ABERTO, não precisa mais
                     
                     checkoutBtn.disabled = false; 
                     checkoutBtn.textContent = '✅ Finalizar e Enviar Pedido';
 
                 })
                 .catch((error) => {
+                    // ERRO NO ENVIO
                     console.error("Erro ao enviar pedido: ", error);
                     showNotification('Erro ao enviar pedido. Tente novamente.');
                     checkoutBtn.disabled = false;
@@ -1565,6 +1573,9 @@
             var hora = agora.getHours();
             var diasAbertos = [4, 5, 6, 0]; // Quinta, Sexta, Sábado, Domingo
             var horarioAberto = hora >= 10; // Abre às 10h
+            
+            // ** FORÇAR ABERTURA PARA TESTES (COMENTE A LINHA ABAIXO EM PRODUÇÃO) **
+            // return true; 
             
             const isAberto = diasAbertos.includes(dia) && horarioAberto;
             
